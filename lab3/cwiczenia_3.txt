@@ -1,0 +1,43 @@
+ZADANIE 2 - Spark UI
+Jobs - Można zobaczyć szczegóły na temat wszystkich wykonanych zadań np. czas wykonania 
+lub graf z wszystkimi etapami potrzebnymi dla danej operacji.
+Stages - Pokazuje kolejne wykonane etapy, można zobaczyć podział jednej operacji na poszczególne części.
+Storage - Informacje o przechowywanych danych w pamięci.
+Environment - Wyświetla informacje o środowisku Spark-a np. ustawienia systemowe lub zmienne środowiskowe.
+Executors - Pokazuje szczegółowe informacje o węzłach wykonawczych (executors), w tym ich status, 
+wykorzystanie pamięci, liczbę zadań oraz czas pracy.
+SQL/DataFrame - Wyświetla wszystkie zapytania SQL i wykonane operacje na DataFrame.
+JDBC/ODBC Server - Pokazuje status połączenia z serwerem JDBC/ODBC.
+Structured Streaming - Prezentuje informacje dotyczące strumieniowego przetwarzania danych.
+
+ZADANIE 3
+namesDf.withColumn('first_name', split(namesDf['name'], ' ')[0]) \
+  .select('first_name') \
+  .sort(desc('first_name')).explain()
+
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- Sort [first_name#8287 DESC NULLS LAST], true, 0
+   +- Exchange rangepartitioning(first_name#8287 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=2754]
+      +- Project [split(name#6212,  , 2)[0] AS first_name#8287]
+         +- FileScan csv [name#6212] Batched: false, DataFilters: [], Format: CSV, Location: InMemoryFileIndex(1 paths)[dbfs:/FileStore/tables/Files/names.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<name:string>
+
+---------------------------------------------------------------------
+
+namesDf.withColumn('first_name', split(namesDf['name'], ' ')[0]) \
+  .select('first_name') \
+  .groupBy('first_name') \
+  .count().sort(desc('count')).explain()
+
+== Physical Plan ==
+AdaptiveSparkPlan isFinalPlan=false
++- Sort [count#8278L DESC NULLS LAST], true, 0
+   +- Exchange rangepartitioning(count#8278L DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=2690]
+      +- HashAggregate(keys=[first_name#8255], functions=[finalmerge_count(merge count#8282L) AS count(1)#8277L])
+         +- Exchange hashpartitioning(first_name#8255, 200), ENSURE_REQUIREMENTS, [plan_id=2687]
+            +- HashAggregate(keys=[first_name#8255], functions=[partial_count(1) AS count#8282L])
+               +- Project [split(name#6212,  , 2)[0] AS first_name#8255]
+                  +- FileScan csv [name#6212] Batched: false, DataFilters: [], Format: CSV, Location: InMemoryFileIndex(1 paths)[dbfs:/FileStore/tables/Files/names.csv], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<name:string>
+
+Przy operacji groupBy występują dodatkowe etapy HashAggregate -> Exchange hashpartitioning -> HashAggregate, które służą do równoległego przetwarzania danych w celu obliczenia agregacji.
+ 
