@@ -1,1 +1,1 @@
-#### **Exercises from university databases course.**
+# **Exercises from university Big Data course.**
