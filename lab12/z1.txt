@@ -1,0 +1,5 @@
+Jobs - pokazuje listę wszystkich zadań Spark (jobs) wraz ze statusem, czasem trwania i powiązanymi etapami (stages).
+Stages - szczegółowe informacje o etapach, z których składa się zadanie (liczba zadań, czas wykonania, itp.).
+Storage - pokazuje zcache’owane dane, ich rozmiar i rozmieszczenie w partycjach.
+Executors - dostarcza informacji o użyciu pamięci, liczbie tasków i przetworzonych danych dla każdego executora (miejsce, gdzie widać dystrybucję danych).
+SQL/DataFrame - przedstawia plan wykonania zapytań Spark SQL i operacji DataFrame, pomagając zrozumieć ich przebieg i optymalizację..
